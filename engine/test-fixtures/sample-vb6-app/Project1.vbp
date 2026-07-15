@@ -1,5 +1,8 @@
 Type=Exe
 Form=Form1.frm
+Form=CustomerAddForm.frm
+Form=CustomerListForm.frm
+Form=CustomerEditForm.frm
 Module=Module1; Module1.bas
-Startup="Form1"
+Startup="CustomerListForm"
 Name="SampleVB6App"

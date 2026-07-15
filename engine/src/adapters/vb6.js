@@ -1,9 +1,8 @@
 import { EXPLORATION_PASSES_CHECKLIST } from "./passesChecklist.js";
 
-// Stub adapter (M2 — ROADMAP.md): detection is validated against
-// test-fixtures/sample-vb6-app, but this prompt context has NOT been run
-// end-to-end against a real VB6 sample the way WinForms was in M1. Expect
-// to need refinement once this adapter actually gets exercised.
+// Validated end-to-end against the CRUD test-fixtures/sample-vb6-app: the
+// risk-flagging pass correctly caught the planted SQL injection and the
+// On Error Resume Next silent-failure risk, with no hallucinated content.
 export const vb6Adapter = {
   id: "vb6",
   displayName: "VB6",

@@ -12,9 +12,9 @@ supplies language-specific prompt context to the analysis engine:
 
 | Adapter | Status | Detection |
 |---|---|---|
-| `.NET WinForms` (`winforms.js`) | Validated end-to-end in M1 | `.csproj` or `.vbproj` present |
-| `VB6` (`vb6.js`) | Stub — detection only, prompt context unvalidated | `.vbp`, `.frm`, or `.bas` present |
-| `Java Swing/NetBeans` (`javaSwing.js`) | Stub — detection only, prompt context unvalidated | `.form` present, or `.java` + a build file |
+| `.NET WinForms` (`winforms.js`) | Validated end-to-end against the full CRUD fixture | `.csproj` or `.vbproj` present |
+| `VB6` (`vb6.js`) | Validated end-to-end against the full CRUD fixture | `.vbp`, `.frm`, or `.bas` present |
+| `Java Swing/NetBeans` (`javaSwing.js`) | Validated end-to-end against the full CRUD fixture | `.form` present, or `.java` + a build file |
 
 `npm test` checks each bundled fixture detects as the right adapter — see
 `src/adapters/adapters.test.js`.
@@ -54,24 +54,32 @@ Optional output path:
 npm run analyze -- test-fixtures/sample-winforms-app --out my-report.json
 ```
 
-You can also point it at `test-fixtures/sample-vb6-app` or
-`test-fixtures/sample-java-swing-app` to exercise the stub adapters
-end-to-end, but that's optional — it costs API credits and isn't required
-to consider M2 done (detection being correct is the acceptance bar; stub
-analysis quality hasn't been validated yet).
+Same works for `test-fixtures/sample-vb6-app` and
+`test-fixtures/sample-java-swing-app` — all three fixtures are now full
+CRUD apps (Create/Read/Update/Delete on a `Customer` entity, plus the
+original billing/lookup screen each started with) and all three adapters
+have been run end-to-end.
 
 ## What "done" looks like
 
 Per `../ROADMAP.md` M1: the report should have a real screen inventory,
 complexity score, effort estimate, and a risk-flag list a human reviewer
-would find genuinely useful. The bundled `test-fixtures/sample-winforms-app`
-has two deliberate risks planted for this check:
+would find genuinely useful. Each fixture has two deliberate risks planted:
 
-- `Data/CustomerRepository.cs` — `FindCustomerIdByLastName` builds its SQL
-  query via string concatenation (SQL injection risk)
-- `BillingForm.cs` — `btnCharge_Click` swallows any exception from
-  `RecordPayment` silently (a failed payment write is dropped with no log
-  and no user-visible error)
+- **WinForms**: `Data/CustomerRepository.cs`'s `FindCustomerIdByLastName`
+  (SQL injection via string concatenation); `BillingForm.cs`'s
+  `btnCharge_Click` (swallowed exception on a failed payment write)
+- **VB6**: `Module1.bas`'s `FindCustomerId` (SQL injection via string
+  concatenation); `Form1.frm`'s `cmdSearch_Click` (`On Error Resume Next`
+  hiding the failure)
+- **Java Swing**: `MainForm.java`'s `onSearch` (SQL injection via string
+  concatenation; also a swallowed `SQLException`)
 
-If the risk_flags list in the output doesn't catch both of these, the
-analysis prompt/approach needs work before M1 is actually done.
+All three were caught correctly on the CRUD-sized fixtures with Haiku 4.5,
+with no hallucinated screens/fields — except one WinForms run that came
+back with hallucinated fields and missed both risks, then was correct again
+on retry. Worth knowing: Haiku's output isn't perfectly consistent
+run-to-run on a larger (~11 file) fixture. If you see a report that looks
+wrong, retry once before assuming the adapter's prompt needs work — and
+switch to `claude-opus-4-8` (see the model note above) if you need
+consistent quality rather than cheap iteration.
