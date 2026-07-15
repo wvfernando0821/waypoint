@@ -4,6 +4,12 @@
   "description": "M1 proof-of-concept: agentic legacy-code analysis engine for Waypoint",
   "type": "module",
   "private": true,
+  "exports": {
+    "./structuralPass": "./src/structuralPass.js",
+    "./analyze": "./src/analyze.js",
+    "./summarize": "./src/summarize.js",
+    "./adapters": "./src/adapters/index.js"
+  },
   "scripts": {
     "analyze": "node --env-file=.env src/cli.js",
     "test": "node --test src/adapters/adapters.test.js"

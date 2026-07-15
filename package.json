@@ -1,0 +1,8 @@
+{
+  "name": "waypoint",
+  "private": true,
+  "workspaces": [
+    "engine",
+    "orchestrator"
+  ]
+}

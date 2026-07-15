@@ -1,0 +1,22 @@
+#!/bin/bash
+set -euo pipefail
+
+dnf install -y docker
+systemctl enable --now docker
+usermod -aG docker ec2-user
+
+# AL2023's dnf repos don't ship a docker-compose-plugin package — install
+# the Compose v2 CLI plugin binary directly, system-wide.
+mkdir -p /usr/local/lib/docker/cli-plugins
+curl -sL "https://github.com/docker/compose/releases/download/v2.29.7/docker-compose-linux-x86_64" \
+  -o /usr/local/lib/docker/cli-plugins/docker-compose
+chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+
+mkdir -p /home/ec2-user/waypoint-dev
+cat > /home/ec2-user/waypoint-dev/docker-compose.yml <<'COMPOSE_EOF'
+${docker_compose_yml}
+COMPOSE_EOF
+
+chown -R ec2-user:ec2-user /home/ec2-user/waypoint-dev
+cd /home/ec2-user/waypoint-dev
+docker compose up -d
