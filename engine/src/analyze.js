@@ -4,7 +4,10 @@ import { z } from "zod";
 import { listDirectory, readFile } from "./fileTools.js";
 import { REPORT_JSON_SCHEMA, WINFORMS_ADAPTER_CONTEXT } from "./reportSchema.js";
 
-const MODEL = "claude-opus-4-8";
+// claude-haiku-4-5 for now (cheap iteration while API credits are limited) —
+// switch to claude-opus-4-8 before actually judging risk-flagging quality
+// against M1's "done" criteria (see ../ROADMAP.md and README.md).
+const MODEL = "claude-haiku-4-5";
 
 /**
  * Spec §4.4 Steps 2-4: agentic exploration (UI / business logic / data

@@ -1,6 +1,8 @@
 import Anthropic from "@anthropic-ai/sdk";
 
-const MODEL = "claude-opus-4-8";
+// See the note in analyze.js — claude-haiku-4-5 for now, swap back to
+// claude-opus-4-8 once there's budget for the real quality check.
+const MODEL = "claude-haiku-4-5";
 
 /**
  * Spec §4.4 Step 5: a separate, shorter natural-language summary generated

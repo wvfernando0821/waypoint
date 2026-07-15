@@ -18,7 +18,15 @@ cp .env.example .env
 
 Edit `.env` and set `ANTHROPIC_API_KEY` to your own key (get one at
 [console.anthropic.com](https://console.anthropic.com) → API Keys). `.env`
-is git-ignored — never commit it.
+is git-ignored — never commit it. The API is pay-as-you-go (no standing free
+tier) — you'll need a payment method or prepaid credits on the account.
+
+**Current model: `claude-haiku-4-5`** (temporary, for cheap iteration while
+credits are limited). `analyze.js` and `summarize.js` each have a `MODEL`
+constant with a comment marking this — switch both to `claude-opus-4-8`
+before actually judging risk-flagging quality against the "done" criteria
+below; Haiku is fine for confirming the plumbing works, not for the real
+quality bar.
 
 ## Run
 
