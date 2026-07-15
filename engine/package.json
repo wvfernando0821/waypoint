@@ -1,0 +1,14 @@
+{
+  "name": "waypoint-engine",
+  "version": "0.1.0",
+  "description": "M1 proof-of-concept: agentic legacy-code analysis engine for Waypoint",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "analyze": "node --env-file=.env src/cli.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.68.0",
+    "zod": "^3.24.0"
+  }
+}
