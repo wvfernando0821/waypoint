@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- NetBeans GUI builder metadata (minimal stub for fixture purposes) -->
+<Form version="1.7">
+  <Component class="javax.swing.JTextField" name="txtLastName" />
+  <Component class="javax.swing.JButton" name="btnSearch" />
+</Form>

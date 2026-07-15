@@ -1,0 +1,5 @@
+<project name="SampleJavaSwingApp" default="build" basedir=".">
+    <target name="build">
+        <javac srcdir="." destdir="build/classes" />
+    </target>
+</project>

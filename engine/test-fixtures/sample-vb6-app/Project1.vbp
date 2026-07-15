@@ -1,0 +1,5 @@
+Type=Exe
+Form=Form1.frm
+Module=Module1; Module1.bas
+Startup="Form1"
+Name="SampleVB6App"

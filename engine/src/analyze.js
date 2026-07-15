@@ -4,7 +4,7 @@ import { betaZodTool } from "@anthropic-ai/sdk/helpers/beta/zod";
 // (the "zod" package at 3.25+ still exports the classic v3 API by default).
 import { z } from "zod/v4";
 import { listDirectory, readFile } from "./fileTools.js";
-import { REPORT_JSON_SCHEMA, WINFORMS_ADAPTER_CONTEXT } from "./reportSchema.js";
+import { REPORT_JSON_SCHEMA } from "./reportSchema.js";
 
 // claude-haiku-4-5 for now (cheap iteration while API credits are limited) —
 // switch to claude-opus-4-8 before actually judging risk-flagging quality
@@ -16,9 +16,11 @@ const MODEL = "claude-haiku-4-5";
  * access / dependency passes) + risk flagging, ending in a structured
  * report constrained to REPORT_JSON_SCHEMA. `inventory` is the Step 1
  * structural-pass output, given to the agent as a starting map instead of
- * dumping the whole tree into the prompt.
+ * dumping the whole tree into the prompt. `adapter` is the matched
+ * language adapter (see adapters/index.js) — its promptContext carries
+ * the language-specific detection signatures, quirks, and pass checklist.
  */
-export async function analyze(rootDir, inventory) {
+export async function analyze(rootDir, inventory, adapter) {
   const client = new Anthropic();
 
   const listDirectoryTool = betaZodTool({
@@ -44,7 +46,7 @@ export async function analyze(rootDir, inventory) {
   });
 
   const systemPrompt = [
-    WINFORMS_ADAPTER_CONTEXT,
+    adapter.promptContext,
     "",
     "File inventory (from a deterministic pre-pass, not yet read):",
     JSON.stringify(inventory.files, null, 2),

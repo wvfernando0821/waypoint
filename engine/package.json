@@ -5,7 +5,8 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "analyze": "node --env-file=.env src/cli.js"
+    "analyze": "node --env-file=.env src/cli.js",
+    "test": "node --test src/adapters/adapters.test.js"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.68.0",

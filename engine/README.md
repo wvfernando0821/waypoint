@@ -1,12 +1,23 @@
-# Waypoint engine — M1 proof-of-concept
+# Waypoint engine — M1/M2 proof-of-concept
 
 Standalone CLI that runs the AI analysis engine (spec §4.4) against a legacy
 codebase and produces a structured migration report + a plain-language
 summary. No database, job queue, or UI yet — those are later milestones
 (see `../ROADMAP.md`).
 
-Currently supports **.NET WinForms** only (the adapter layer that makes this
-pluggable across languages is M2).
+## Adapters
+
+`src/adapters/` (M2) detects the source language from the file inventory and
+supplies language-specific prompt context to the analysis engine:
+
+| Adapter | Status | Detection |
+|---|---|---|
+| `.NET WinForms` (`winforms.js`) | Validated end-to-end in M1 | `.csproj` or `.vbproj` present |
+| `VB6` (`vb6.js`) | Stub — detection only, prompt context unvalidated | `.vbp`, `.frm`, or `.bas` present |
+| `Java Swing/NetBeans` (`javaSwing.js`) | Stub — detection only, prompt context unvalidated | `.form` present, or `.java` + a build file |
+
+`npm test` checks each bundled fixture detects as the right adapter — see
+`src/adapters/adapters.test.js`.
 
 ## Setup
 
@@ -42,6 +53,12 @@ Optional output path:
 ```
 npm run analyze -- test-fixtures/sample-winforms-app --out my-report.json
 ```
+
+You can also point it at `test-fixtures/sample-vb6-app` or
+`test-fixtures/sample-java-swing-app` to exercise the stub adapters
+end-to-end, but that's optional — it costs API credits and isn't required
+to consider M2 done (detection being correct is the acceptance bar; stub
+analysis quality hasn't been validated yet).
 
 ## What "done" looks like
 
