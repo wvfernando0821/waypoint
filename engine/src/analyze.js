@@ -1,6 +1,8 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { betaZodTool } from "@anthropic-ai/sdk/helpers/beta/zod";
-import { z } from "zod";
+// betaZodTool's internal JSON-schema conversion needs zod v4-shaped schemas
+// (the "zod" package at 3.25+ still exports the classic v3 API by default).
+import { z } from "zod/v4";
 import { listDirectory, readFile } from "./fileTools.js";
 import { REPORT_JSON_SCHEMA, WINFORMS_ADAPTER_CONTEXT } from "./reportSchema.js";
 
@@ -51,7 +53,8 @@ export async function analyze(rootDir, inventory) {
   const finalMessage = await client.beta.messages.toolRunner({
     model: MODEL,
     max_tokens: 16000,
-    thinking: { type: "adaptive" },
+    // claude-haiku-4-5 doesn't support adaptive thinking — re-add
+    // `thinking: { type: "adaptive" }` when MODEL is switched to opus-4-8.
     system: systemPrompt,
     tools: [listDirectoryTool, readFileTool],
     output_config: { format: { type: "json_schema", schema: REPORT_JSON_SCHEMA } },

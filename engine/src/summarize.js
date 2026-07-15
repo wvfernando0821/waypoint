@@ -16,7 +16,8 @@ export async function summarize(report) {
   const message = await client.messages.create({
     model: MODEL,
     max_tokens: 1024,
-    thinking: { type: "adaptive" },
+    // claude-haiku-4-5 doesn't support adaptive thinking — re-add
+    // `thinking: { type: "adaptive" }` when MODEL is switched to opus-4-8.
     system:
       "You write short, plain-language migration-report summaries for a non-technical client reviewer. No jargon, no code, no headers — 3 to 5 sentences.",
     messages: [
