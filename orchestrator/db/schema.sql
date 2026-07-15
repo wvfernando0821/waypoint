@@ -6,13 +6,18 @@ CREATE TABLE IF NOT EXISTS projects (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   owner_id UUID, -- no auth/users table yet; populated once multi-tenancy lands
   name TEXT NOT NULL,
-  -- Nullable: real detection happens inside the analyze job (M4 will move
-  -- this earlier, to upload time), not at project-creation time.
+  -- Nullable: detection (M4) runs after the project row exists, once the
+  -- source has actually landed on disk (zip/git/dev sourcePath).
   source_type TEXT CHECK (source_type IN ('dotnet_winforms', 'vb6', 'java_swing')),
-  source_path TEXT NOT NULL, -- M3 stand-in for real zip/Git upload handling (M4)
+  source_path TEXT, -- set once ingestion (zip/git/dev sourcePath, M4) finishes
   status TEXT NOT NULL DEFAULT 'created',
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- M4: source_path used to be required at creation time (M3 stand-in for
+-- real upload); idempotent for pre-M4 databases that already have the
+-- NOT NULL constraint, a no-op otherwise.
+ALTER TABLE projects ALTER COLUMN source_path DROP NOT NULL;
 
 CREATE TABLE IF NOT EXISTS migration_jobs (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

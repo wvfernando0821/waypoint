@@ -11,3 +11,8 @@ export const ADAPTERS = [winformsAdapter, vb6Adapter, javaSwingAdapter];
 export function detectAdapter(inventory) {
   return ADAPTERS.find((adapter) => adapter.detect(inventory)) || null;
 }
+
+/** Looks up a previously-detected adapter by its stored id, or null. */
+export function getAdapterById(id) {
+  return ADAPTERS.find((adapter) => adapter.id === id) || null;
+}

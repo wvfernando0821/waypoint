@@ -1,10 +1,10 @@
 import { Queue, Worker } from "bullmq";
 import IORedis from "ioredis";
 import { structuralPass } from "waypoint-engine/structuralPass";
-import { detectAdapter } from "waypoint-engine/adapters";
+import { getAdapterById } from "waypoint-engine/adapters";
 import { analyze } from "waypoint-engine/analyze";
 import { summarize } from "waypoint-engine/summarize";
-import { getJob, updateJob, updateProjectSourceType, saveReport } from "./db.js";
+import { getJob, updateJob, getProject, saveReport } from "./db.js";
 import { publishProgress } from "./progressBus.js";
 
 // BullMQ manages blocking Redis commands itself and requires this exact
@@ -21,33 +21,30 @@ export function startWorker() {
   const worker = new Worker(
     "analyze",
     async (bullJob) => {
-      const { jobId, projectId, sourcePath } = bullJob.data;
+      const { jobId, projectId } = bullJob.data;
 
       await updateJob(jobId, { status: "running", started_at: new Date() });
       publishProgress(jobId, { phase: "analyze", status: "running", message: "Structural pass..." });
 
-      const inventory = await structuralPass(sourcePath);
-      publishProgress(jobId, {
-        phase: "analyze",
-        status: "running",
-        message: `${inventory.fileCount} files found.`,
-      });
-
-      const adapter = detectAdapter(inventory);
+      // Detection already happened at upload time (M4) — look up the
+      // adapter that was matched then, rather than re-detecting here.
+      const project = await getProject(projectId);
+      const adapter = getAdapterById(project.source_type);
       if (!adapter) {
-        const message = "No known adapter matched this codebase.";
+        const message = `Project has no valid detected adapter (source_type: ${project.source_type}).`;
         await updateJob(jobId, { status: "failed", completed_at: new Date(), error_message: message });
         publishProgress(jobId, { phase: "analyze", status: "failed", message });
         return;
       }
-      await updateProjectSourceType(projectId, adapter.id);
+
+      const inventory = await structuralPass(project.source_path);
       publishProgress(jobId, {
         phase: "analyze",
         status: "running",
-        message: `Detected adapter: ${adapter.displayName}`,
+        message: `${inventory.fileCount} files found. Adapter: ${adapter.displayName}`,
       });
 
-      const report = await analyze(sourcePath, inventory, adapter);
+      const report = await analyze(project.source_path, inventory, adapter);
       publishProgress(jobId, { phase: "analyze", status: "running", message: "Generating summary..." });
 
       const summary = await summarize(report);

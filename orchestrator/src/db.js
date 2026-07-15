@@ -2,12 +2,12 @@ import pg from "pg";
 
 export const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
 
-export async function createProject({ name, sourcePath }) {
+export async function createProject({ name }) {
   const { rows } = await pool.query(
     `INSERT INTO projects (name, source_path, status)
-     VALUES ($1, $2, 'created')
+     VALUES ($1, NULL, 'created')
      RETURNING id, name, source_type, source_path, status, created_at`,
-    [name, sourcePath],
+    [name],
   );
   return rows[0];
 }
@@ -17,8 +17,21 @@ export async function getProject(id) {
   return rows[0] || null;
 }
 
-export async function updateProjectSourceType(projectId, sourceType) {
-  await pool.query(`UPDATE projects SET source_type = $1 WHERE id = $2`, [sourceType, projectId]);
+export async function updateProject(id, fields) {
+  const sets = [];
+  const values = [];
+  let i = 1;
+  for (const [key, value] of Object.entries(fields)) {
+    sets.push(`${key} = $${i}`);
+    values.push(value);
+    i += 1;
+  }
+  values.push(id);
+  const { rows } = await pool.query(
+    `UPDATE projects SET ${sets.join(", ")} WHERE id = $${i} RETURNING *`,
+    values,
+  );
+  return rows[0];
 }
 
 export async function createJob({ projectId, phase }) {

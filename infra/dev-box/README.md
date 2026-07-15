@@ -36,6 +36,13 @@ terraform output -raw database_url
 aws ec2 start-instances --instance-ids $(terraform output -raw instance_id)
 ```
 
+**The instance's public IP changes every time it stops and starts** (no
+Elastic IP attached, by design — one more moving cost). Refresh Terraform's
+state before reading `ssh_tunnel_command`, or it'll hand you the stale IP:
+```
+terraform apply -refresh-only -auto-approve
+```
+
 Then open the tunnel (keep this terminal open while you work):
 ```
 $(terraform output -raw ssh_tunnel_command)

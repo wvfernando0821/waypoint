@@ -8,13 +8,12 @@ export const jobsRouter = Router();
 jobsRouter.post("/:projectId/analyze", async (req, res) => {
   const project = await getProject(req.params.projectId);
   if (!project) return res.status(404).json({ error: "Project not found" });
+  if (!project.source_type || !project.source_path) {
+    return res.status(400).json({ error: "Project has no detected source type yet (upload/detection must succeed first)" });
+  }
 
   const job = await createJob({ projectId: project.id, phase: "analyze" });
-  await analyzeQueue.add("analyze", {
-    jobId: job.id,
-    projectId: project.id,
-    sourcePath: project.source_path,
-  });
+  await analyzeQueue.add("analyze", { jobId: job.id, projectId: project.id });
 
   res.status(202).json(job);
 });
